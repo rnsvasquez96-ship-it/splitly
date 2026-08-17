@@ -98,9 +98,9 @@ class _AddGroupExpenseScreenState
 
           TextField(
             controller: _amountController,
-            keyboardType:
-            const TextInputType.numberWithOptions(
+            keyboardType: const TextInputType.numberWithOptions(
               decimal: true,
+              signed: false,
             ),
             decoration: const InputDecoration(
               labelText: "Amount",
@@ -110,14 +110,18 @@ class _AddGroupExpenseScreenState
 
           const SizedBox(height: 25),
 
-          const Text(
-            "Paid By",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Text(
+              "Paid By",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 
-          DropdownButton<String>(
+          DropdownButtonFormField<String>(
             value: _paidBy,
             isExpanded: true,
             items: widget.group.members
@@ -155,9 +159,21 @@ class _AddGroupExpenseScreenState
                 onChanged: (value) {
                   setState(() {
                     if (value == true) {
-                      _selectedMembers.add(member.name);
+                      if (!_selectedMembers.contains(member.name)) {
+                        _selectedMembers.add(member.name);
+                      }
                     } else {
-                      _selectedMembers.remove(member.name);
+                      if (_selectedMembers.length > 1) {
+                        _selectedMembers.remove(member.name);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "At least one member must share the expense.",
+                            ),
+                          ),
+                        );
+                      }
                     }
                   });
                 },
@@ -167,10 +183,18 @@ class _AddGroupExpenseScreenState
 
           const SizedBox(height: 30),
 
-          FilledButton(
-            onPressed: _saveExpense,
-            child: const Text(
-              "Save Expense",
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: FilledButton(
+              onPressed: _saveExpense,
+              child: const Text(
+                "Save Expense",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],

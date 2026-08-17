@@ -56,8 +56,8 @@ class SplitService {
       final debtor = debtors[i];
       final creditor = creditors[j];
 
-      final amount = (-debtor.value)
-          .clamp(0, creditor.value);
+      final double amount =
+      (-debtor.value).clamp(0.0, creditor.value).toDouble();
 
       settlements.add(
         Settlement(

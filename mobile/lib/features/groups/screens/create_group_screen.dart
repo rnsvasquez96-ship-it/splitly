@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../models/group.dart';
+
 class CreateGroupScreen extends StatefulWidget {
   const CreateGroupScreen({super.key});
 
@@ -9,6 +11,7 @@ class CreateGroupScreen extends StatefulWidget {
 
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -24,17 +27,25 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       return;
     }
 
-    Navigator.pop(context, {
-      'name': _nameController.text.trim(),
-      'description': _descriptionController.text.trim(),
-    });
+    final group = Group(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: _nameController.text.trim(),
+      description: _descriptionController.text.trim(),
+      members: [],
+      expenses: [],
+    );
+
+    Navigator.pop<Group>(
+      context,
+      group,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Group'),
+        title: const Text("Create Group"),
       ),
       body: SafeArea(
         child: Form(
@@ -43,86 +54,60 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             padding: const EdgeInsets.all(20),
             children: [
               const Text(
-                'Create a new group',
+                "Create a new group",
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               const SizedBox(height: 8),
-              const Text(
-                'Create a group to easily split expenses with friends, family, or teammates.',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 32),
 
               const Text(
-                'Group Name',
+                "Create a group to split expenses with friends or family.",
                 style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 8),
+
+              const SizedBox(height: 30),
 
               TextFormField(
                 controller: _nameController,
-                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
-                  hintText: 'e.g. Barkada Trip',
-                  prefixIcon: Icon(Icons.groups_outlined),
+                  labelText: "Group Name",
+                  prefixIcon: Icon(Icons.groups),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a group name';
+                    return "Please enter a group name";
                   }
-
-                  if (value.trim().length < 2) {
-                    return 'Group name is too short';
-                  }
-
                   return null;
                 },
               ),
 
-              const SizedBox(height: 24),
-
-              const Text(
-                'Description',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
 
               TextFormField(
                 controller: _descriptionController,
-                maxLines: 4,
+                maxLines: 3,
                 decoration: const InputDecoration(
-                  hintText: 'What is this group for?',
-                  prefixIcon: Padding(
-                    padding: EdgeInsets.only(bottom: 60),
-                    child: Icon(Icons.description_outlined),
-                  ),
+                  labelText: "Description",
+                  prefixIcon: Icon(Icons.description),
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
 
               SizedBox(
-                height: 54,
+                height: 55,
                 child: FilledButton(
                   onPressed: _createGroup,
                   child: const Text(
-                    'Create Group',
+                    "Create Group",
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),

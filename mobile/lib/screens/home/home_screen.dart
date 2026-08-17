@@ -224,7 +224,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _expenses.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  separatorBuilder: (context, index) =>
+                  const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final expense = _expenses[index];
 
