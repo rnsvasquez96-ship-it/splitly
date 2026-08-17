@@ -1,22 +1,22 @@
-
 import 'package:flutter/material.dart';
 
-import 'theme/theme.dart';
-import '../screens/home/home_screen.dart';
+import 'theme/app_theme.dart';
+import 'main_shell.dart';
 
 class SplitlyApp extends StatelessWidget {
-const SplitlyApp({super.key});
+  const SplitlyApp({super.key});
 
-@override
-Widget build(BuildContext context) {
-return MaterialApp(
-title: 'Splitly',
-debugShowCheckedModeBanner: false,
-theme: AppTheme.lightTheme,
-darkTheme: AppTheme.darkTheme,
-themeMode: ThemeMode.system,
-home: const HomeScreen(),
-);
-}
-}
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Splitly',
+      debugShowCheckedModeBanner: false,
 
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+
+      home: const MainShell(),
+    );
+  }
+}

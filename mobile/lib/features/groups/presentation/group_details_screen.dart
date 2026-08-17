@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/group.dart';
 import '../models/member.dart';
 import '../../expenses/models/expense.dart';
-import '../../expenses/presentation/screens/add_group_expense_screen.dart';
+import '../../expenses/presentation/screens/expense_form_screen.dart';
 import '../screens/add_member_screen.dart';
 import '../../settlements/presentation/balance_section.dart';
 import '../../settlements/presentation/settlement_section.dart';
@@ -20,12 +20,80 @@ class GroupDetailsScreen extends StatefulWidget {
   @override
   State<GroupDetailsScreen> createState() =>
       _GroupDetailsScreenState();
+
 }
 
 class _GroupDetailsScreenState
     extends State<GroupDetailsScreen> {
+
 late List<Member> _members;
 late List<Expense> _expenses;
+Future<void> _editExpense(int index) async {
+  final Expense? updatedExpense =
+  await Navigator.push<Expense>(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ExpenseFormScreen(
+        group: widget.group,
+        expense: _expenses[index],
+      ),
+    ),
+  );
+
+  if (updatedExpense == null) return;
+
+  setState(() {
+    _expenses[index] = updatedExpense;
+    widget.group.expenses[index] = updatedExpense;
+  });
+
+  if (!mounted) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text("Expense updated"),
+    ),
+  );
+}
+
+Future<void> _deleteExpense(int index) async {
+  final expense = _expenses[index];
+
+  final bool? confirm = await showDialog<bool>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text("Delete Expense"),
+      content: Text(
+        "Delete '${expense.title}'?",
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text("Cancel"),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text("Delete"),
+        ),
+      ],
+    ),
+  );
+
+  if (confirm != true) return;
+
+  setState(() {
+    _expenses.removeAt(index);
+    widget.group.expenses.removeAt(index);
+  });
+
+  if (!mounted) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text("${expense.title} deleted"),
+    ),
+  );
+}
 
 @override
 void initState() {
@@ -82,9 +150,9 @@ await Navigator.push<Expense>(
 context,
 MaterialPageRoute(
 builder: (_) =>
-AddGroupExpenseScreen(
-group: widget.group,
-),
+    ExpenseFormScreen(
+      group: widget.group,
+    )
 ),
 );
 
@@ -455,13 +523,17 @@ textAlign: TextAlign.center,
 ),
 )
 else
-..._expenses.map(
-(expense) {
+  ..._expenses.asMap().entries.map(
+        (entry) {
+      final index = entry.key;
+      final expense = entry.value;
 
 return Card(
 margin:
 const EdgeInsets.only(bottom: 10),
 child: ListTile(
+  onTap: () => _editExpense(index),
+  onLongPress: () => _deleteExpense(index),
 leading: const CircleAvatar(
 child: Icon(Icons.receipt_long),
 ),
@@ -471,15 +543,39 @@ style: const TextStyle(
 fontWeight: FontWeight.bold,
 ),
 ),
-subtitle: Text(
-"Paid by ${expense.paidBy}",
-),
-trailing: Text(
-"₱${expense.amount.toStringAsFixed(2)}",
-style: const TextStyle(
-fontWeight: FontWeight.bold,
-),
-),
+  subtitle: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        "${expense.category.emoji} ${expense.category.label}",
+        style: TextStyle(
+          color: Colors.grey.shade600,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      const SizedBox(height: 2),
+      Text(
+        "Paid by ${expense.paidBy}",
+      ),
+    ],
+  ),
+  trailing: Container(
+    padding: const EdgeInsets.symmetric(
+      horizontal: 10,
+      vertical: 6,
+    ),
+    decoration: BoxDecoration(
+      color: Colors.green.withValues(alpha: .10),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Text(
+      "₱${expense.amount.toStringAsFixed(2)}",
+      style: const TextStyle(
+        color: Colors.green,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
 ),
 );
 },

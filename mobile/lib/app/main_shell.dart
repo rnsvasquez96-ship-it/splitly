@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../features/dashboard/dashboard_screen.dart';
 import '../features/groups/presentation/groups_screen.dart';
-import '../screens/home/home_screen.dart';
+import '../features/analytics/presentation/analytics_screen.dart';
+import 'widgets/app_bottom_navbar.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -13,9 +15,11 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    GroupsScreen(),
+  late final List<Widget> _pages = [
+    const DashboardScreen(),
+    const GroupsScreen(),
+    const AnalyticsScreen(),
+    const _SettingsPlaceholder(),
   ];
 
   @override
@@ -23,27 +27,31 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: _pages,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
+      bottomNavigationBar: AppBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.groups_outlined),
-            selectedIcon: Icon(Icons.groups),
-            label: 'Groups',
-          ),
-        ],
+      ),
+    );
+  }
+}
+
+class _SettingsPlaceholder extends StatelessWidget {
+  const _SettingsPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Text(
+          "Settings\nComing Soon",
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

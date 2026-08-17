@@ -2,31 +2,49 @@ import 'package:flutter/material.dart';
 
 import '../../../groups/models/group.dart';
 import '../../models/expense.dart';
+import '../../models/expense_category.dart';
 
-class AddGroupExpenseScreen extends StatefulWidget {
+class ExpenseFormScreen extends StatefulWidget {
   final Group group;
+  final Expense? expense;
 
-  const AddGroupExpenseScreen({
+  const ExpenseFormScreen({
     super.key,
     required this.group,
+    this.expense,
   });
 
   @override
-  State<AddGroupExpenseScreen> createState() =>
-      _AddGroupExpenseScreenState();
+  State<ExpenseFormScreen> createState() =>
+      _ExpenseFormScreenState();
 }
 
-class _AddGroupExpenseScreenState
-    extends State<AddGroupExpenseScreen> {
+class _ExpenseFormScreenState
+    extends State<ExpenseFormScreen> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
 
   String? _paidBy;
+  ExpenseCategory _category = ExpenseCategory.food;
+
   final List<String> _selectedMembers = [];
+
 
   @override
   void initState() {
     super.initState();
+
+    if (widget.expense != null) {
+      final expense = widget.expense!;
+
+      _titleController.text = expense.title;
+      _amountController.text = expense.amount.toString();
+      _paidBy = expense.paidBy;
+      _category = expense.category;
+
+      _selectedMembers.addAll(expense.splitBetween);
+      return;
+    }
 
     if (widget.group.members.isNotEmpty) {
       _paidBy = widget.group.members.first.name;
@@ -59,7 +77,7 @@ class _AddGroupExpenseScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Please complete all fields.',
+            "Please complete all fields.",
           ),
         ),
       );
@@ -67,12 +85,14 @@ class _AddGroupExpenseScreenState
     }
 
     final expense = Expense(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.expense?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
       amount: amount,
       paidBy: _paidBy!,
       splitBetween: _selectedMembers,
-      createdAt: DateTime.now(),
+      createdAt: widget.expense?.createdAt ?? DateTime.now(),
+      category: _category,
     );
 
     Navigator.pop(context, expense);
@@ -82,7 +102,11 @@ class _AddGroupExpenseScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Expense"),
+        title: Text(
+          widget.expense == null
+              ? "Add Expense"
+              : "Edit Expense",
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -98,9 +122,9 @@ class _AddGroupExpenseScreenState
 
           TextField(
             controller: _amountController,
-            keyboardType: const TextInputType.numberWithOptions(
+            keyboardType:
+            const TextInputType.numberWithOptions(
               decimal: true,
-              signed: false,
             ),
             decoration: const InputDecoration(
               labelText: "Amount",
@@ -108,18 +132,31 @@ class _AddGroupExpenseScreenState
             ),
           ),
 
-          const SizedBox(height: 25),
+          const SizedBox(height: 20),
 
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
-            child: Text(
-              "Paid By",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+          DropdownButtonFormField<ExpenseCategory>(
+            initialValue: _category,
+            decoration: const InputDecoration(
+              labelText: "Category",
             ),
+            items: ExpenseCategory.values.map((category) {
+              return DropdownMenuItem(
+                value: category,
+                child: Text(
+                  "${category.emoji} ${category.label}",
+                ),
+              );
+            }).toList(),
+            onChanged: (value) {
+              if (value == null) return;
+
+              setState(() {
+                _category = value;
+              });
+            },
           ),
+
+          const SizedBox(height: 25),
 
           DropdownButtonFormField<String>(
             initialValue: _paidBy,
@@ -128,7 +165,7 @@ class _AddGroupExpenseScreenState
             ),
             items: widget.group.members
                 .map(
-                  (member) => DropdownMenuItem<String>(
+                  (member) => DropdownMenuItem(
                 value: member.name,
                 child: Text(member.name),
               ),
@@ -150,48 +187,47 @@ class _AddGroupExpenseScreenState
             ),
           ),
 
-          ...widget.group.members.map(
-                (member) {
-              final selected =
-              _selectedMembers.contains(member.name);
+          ...widget.group.members.map((member) {
+            final selected =
+            _selectedMembers.contains(member.name);
 
-              return CheckboxListTile(
-                title: Text(member.name),
-                value: selected,
-                onChanged: (value) {
-                  setState(() {
-                    if (value == true) {
-                      if (!_selectedMembers.contains(member.name)) {
-                        _selectedMembers.add(member.name);
-                      }
-                    } else {
-                      if (_selectedMembers.length > 1) {
-                        _selectedMembers.remove(member.name);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              "At least one member must share the expense.",
-                            ),
-                          ),
-                        );
-                      }
+            return CheckboxListTile(
+              title: Text(member.name),
+              value: selected,
+              onChanged: (value) {
+                setState(() {
+                  if (value == true) {
+                    if (!_selectedMembers.contains(member.name)) {
+                      _selectedMembers.add(member.name);
                     }
-                  });
-                },
-              );
-            },
-          ),
+                  } else {
+                    if (_selectedMembers.length > 1) {
+                      _selectedMembers.remove(member.name);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "At least one member must share the expense.",
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                });
+              },
+            );
+          }),
 
           const SizedBox(height: 30),
 
           SizedBox(
-            width: double.infinity,
             height: 56,
             child: FilledButton(
               onPressed: _saveExpense,
-              child: const Text(
-                "Save Expense",
+              child: Text(
+                widget.expense == null
+                    ? "Add Expense"
+                    : "Save Changes",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
