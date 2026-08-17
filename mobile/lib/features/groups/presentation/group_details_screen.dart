@@ -8,6 +8,7 @@ import '../screens/add_member_screen.dart';
 import '../../settlements/presentation/balance_section.dart';
 import '../../settlements/presentation/settlement_section.dart';
 
+
 class GroupDetailsScreen extends StatefulWidget {
   final Group group;
 

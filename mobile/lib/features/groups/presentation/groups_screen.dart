@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/group.dart';
+import '../repository/group_repository.dart';
 import '../screens/create_group_screen.dart';
 import 'group_details_screen.dart';
 
@@ -12,7 +13,7 @@ class GroupsScreen extends StatefulWidget {
 }
 
 class _GroupsScreenState extends State<GroupsScreen> {
-  final List<Group> _groups = [];
+  final GroupRepository _repository = GroupRepository.instance;
 
   Future<void> _openCreateGroup() async {
     final Group? group = await Navigator.push<Group>(
@@ -25,7 +26,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
     if (group == null) return;
 
     setState(() {
-      _groups.add(group);
+      _repository.addGroup(group);
     });
   }
 
@@ -37,17 +38,21 @@ class _GroupsScreenState extends State<GroupsScreen> {
           group: group,
         ),
       ),
-    );
+    ).then((_) {
+      setState(() {});
+    });
   }
 
-  void _deleteGroup(int index) {
+  void _deleteGroup(Group group) {
     setState(() {
-      _groups.removeAt(index);
+      _repository.removeGroup(group);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final groups = _repository.getGroups();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -62,13 +67,13 @@ class _GroupsScreenState extends State<GroupsScreen> {
         icon: const Icon(Icons.add),
         label: const Text("Create Group"),
       ),
-      body: _groups.isEmpty
+      body: groups.isEmpty
           ? const _EmptyState()
           : ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: _groups.length,
+        itemCount: groups.length,
         itemBuilder: (context, index) {
-          final group = _groups[index];
+          final group = groups[index];
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
@@ -92,7 +97,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
                   Icons.delete_outline,
                   color: Colors.red,
                 ),
-                onPressed: () => _deleteGroup(index),
+                onPressed: () => _deleteGroup(group),
               ),
               onTap: () => _openGroup(group),
             ),
