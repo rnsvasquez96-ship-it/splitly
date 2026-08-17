@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 
 import '../screens/add_member_screen.dart';
+import '../../expenses/presentation/screens/add_group_expense_screen.dart';
+import '../../expenses/models/expense.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
 final Map<String, dynamic> group;
@@ -16,6 +18,34 @@ State<GroupDetailsScreen> createState() => _GroupDetailsScreenState();
 }
 
 class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
+  Future<void> _addExpense() async {
+    final Expense? expense = await Navigator.push<Expense>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddGroupExpenseScreen(
+          group: widget.group,
+        ),
+      ),
+    );
+
+    if (expense == null) {
+      return;
+    }
+
+    setState(() {
+      _expenses.add(expense.toMap());
+    });
+
+    widget.group['expenses'] = _expenses;
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${expense.title} added'),
+      ),
+    );
+  }
 List<Map<String, dynamic>> _members = [];
 List<Map<String, dynamic>> _expenses = [];
 
@@ -165,8 +195,27 @@ const SizedBox(height: 40),
 ],
 ),
 ),
-floatingActionButton: FloatingActionButton.extended(
-onPressed: _addMember,
+  floatingActionButton: Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+
+      FloatingActionButton.extended(
+        heroTag: "member",
+        onPressed: _addMember,
+        icon: const Icon(Icons.person_add),
+        label: const Text("Member"),
+      ),
+
+      const SizedBox(height: 12),
+
+      FloatingActionButton.extended(
+        heroTag: "expense",
+        onPressed: _addExpense,
+        icon: const Icon(Icons.receipt_long),
+        label: const Text("Expense"),
+      ),
+    ],
+  ),
 icon: const Icon(Icons.person_add_alt_1),
 label: const Text('Add Member'),
 ),
@@ -404,8 +453,24 @@ Widget _buildExpensesSection() {
 return Column(
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
-const Text(
-'Expenses',
+Row(
+children: [
+const Expanded(
+child: Text(
+  'Expenses',
+  style: TextStyle(
+    fontSize: 21,
+    fontWeight: FontWeight.w800,
+  ),
+),
+  ),
+  TextButton.icon(
+  onPressed: _addExpense,
+  icon: const Icon(Icons.add),
+  label: const Text('Add'),
+  ),
+  ],
+  ),
 style: TextStyle(
 fontSize: 21,
 fontWeight: FontWeight.w800,
