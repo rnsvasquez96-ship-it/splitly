@@ -15,6 +15,20 @@ class GroupsScreen extends StatefulWidget {
 class _GroupsScreenState extends State<GroupsScreen> {
   final GroupRepository _repository = GroupRepository.instance;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadGroups();
+  }
+
+  Future<void> _loadGroups() async {
+    await _repository.loadGroups();
+
+    if (!mounted) return;
+
+    setState(() {});
+  }
+
   Future<void> _openCreateGroup() async {
     final Group? group = await Navigator.push<Group>(
       context,
@@ -25,9 +39,11 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
     if (group == null) return;
 
-    setState(() {
-      _repository.addGroup(group);
-    });
+    await _repository.addGroup(group);
+
+    if (!mounted) return;
+
+    setState(() {});
   }
 
   void _openGroup(Group group) {
@@ -38,15 +54,21 @@ class _GroupsScreenState extends State<GroupsScreen> {
           group: group,
         ),
       ),
-    ).then((_) {
+    ).then((_) async {
+      await _repository.saveGroups();
+
+      if (!mounted) return;
+
       setState(() {});
     });
   }
 
-  void _deleteGroup(Group group) {
-    setState(() {
-      _repository.removeGroup(group);
-    });
+  Future<void> _deleteGroup(Group group) async {
+    await _repository.removeGroup(group);
+
+    if (!mounted) return;
+
+    setState(() {});
   }
 
   @override
