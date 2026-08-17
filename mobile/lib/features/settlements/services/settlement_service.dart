@@ -52,9 +52,11 @@ class SettlementService {
 
       settlements.add(
         Settlement(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
           from: debtor.key,
           to: creditor.key,
           amount: amount,
+          settledAt: DateTime.now(),
         ),
       );
 

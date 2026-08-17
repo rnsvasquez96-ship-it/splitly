@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../expenses/models/expense.dart';
 import '../services/settlement_service.dart';
+import '../services/settlement_history_service.dart';
+import '../widgets/settlement_card.dart';
+import '../models/settlement.dart';
 
 class SettlementSection extends StatelessWidget {
   final List<Expense> expenses;
@@ -14,6 +17,12 @@ class SettlementSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settlements = SettlementService.calculate(expenses);
+
+    final pendingSettlements = settlements.where(
+          (settlement) =>
+      !SettlementHistoryService.instance
+          .isSettled(settlement),
+    ).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,7 +37,7 @@ class SettlementSection extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        if (settlements.isEmpty)
+        if (pendingSettlements.isEmpty)
           Card(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -56,32 +65,25 @@ class SettlementSection extends StatelessWidget {
             ),
           )
         else
-          ...settlements.map(
+          ...pendingSettlements.map(
                 (settlement) {
-              return Card(
-                margin: const EdgeInsets.only(bottom: 10),
-                child: ListTile(
-                  leading: const CircleAvatar(
-                    child: Icon(Icons.compare_arrows),
-                  ),
-                  title: Text(
-                    "${settlement.from} → ${settlement.to}",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+              return SettlementCard(
+                settlement: settlement,
+                onSettle: () {
+                  SettlementHistoryService.instance.settle(
+                    Settlement(
+                      id: DateTime.now()
+                          .millisecondsSinceEpoch
+                          .toString(),
+                      from: settlement.from,
+                      to: settlement.to,
+                      amount: settlement.amount,
+                      settledAt: DateTime.now(),
                     ),
-                  ),
-                  subtitle: const Text(
-                    "Suggested payment",
-                  ),
-                  trailing: Text(
-                    "₱${settlement.amount.toStringAsFixed(2)}",
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
+                  );
+
+                  (context as Element).markNeedsBuild();
+                },
               );
             },
           ),

@@ -4,6 +4,8 @@ import '../../expenses/models/expense.dart';
 import '../../groups/models/group.dart';
 import '../../groups/repository/group_repository.dart';
 import '../services/analytics_service.dart';
+import '../widgets/monthly_chart.dart';
+import '../widgets/category_pie_chart.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -13,17 +15,20 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  final _repository = GroupRepository.instance;
+  final GroupRepository _repository = GroupRepository.instance;
 
   List<Group> get groups => _repository.getGroups();
 
   List<Expense> get expenses =>
-      groups.expand((g) => g.expenses).toList();
+      groups.expand((group) => group.expenses).toList();
 
   @override
   Widget build(BuildContext context) {
-    final largest =
+    final largestExpense =
     AnalyticsService.largestExpense(expenses);
+
+    final topSpender =
+    AnalyticsService.topSpender(expenses);
 
     return Scaffold(
       appBar: AppBar(
@@ -47,42 +52,57 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
           const SizedBox(height: 16),
 
-          _SummaryTile(
-            title: "Average Expense",
-            value:
-            "₱${AnalyticsService.averageExpense(expenses).toStringAsFixed(2)}",
-            icon: Icons.analytics,
-            color: Colors.orange,
+          Row(
+            children: [
+              Expanded(
+                child: _SummaryTile(
+                  title: "Groups",
+                  value: AnalyticsService
+                      .totalGroups(groups)
+                      .toString(),
+                  icon: Icons.groups,
+                  color: Colors.deepPurple,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _SummaryTile(
+                  title: "Members",
+                  value: AnalyticsService
+                      .totalMembers(groups)
+                      .toString(),
+                  icon: Icons.people,
+                  color: Colors.teal,
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 16),
 
-          _SummaryTile(
-            title: "Transactions",
-            value: AnalyticsService.totalTransactions(expenses)
-                .toString(),
-            icon: Icons.receipt_long,
-            color: Colors.blue,
-          ),
-
-          const SizedBox(height: 16),
-
-          _SummaryTile(
-            title: "Groups",
-            value:
-            AnalyticsService.totalGroups(groups).toString(),
-            icon: Icons.groups,
-            color: Colors.purple,
-          ),
-
-          const SizedBox(height: 16),
-
-          _SummaryTile(
-            title: "Members",
-            value:
-            AnalyticsService.totalMembers(groups).toString(),
-            icon: Icons.people,
-            color: Colors.teal,
+          Row(
+            children: [
+              Expanded(
+                child: _SummaryTile(
+                  title: "Transactions",
+                  value: AnalyticsService
+                      .totalTransactions(expenses)
+                      .toString(),
+                  icon: Icons.receipt_long,
+                  color: Colors.blue,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _SummaryTile(
+                  title: "Average",
+                  value:
+                  "₱${AnalyticsService.averageExpense(expenses).toStringAsFixed(2)}",
+                  icon: Icons.bar_chart,
+                  color: Colors.orange,
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 24),
@@ -90,7 +110,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: largest == null
+              child: largestExpense == null
                   ? const Text("No expenses yet.")
                   : Column(
                 crossAxisAlignment:
@@ -103,22 +123,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
-                    largest.title,
+                    largestExpense.title,
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 6),
                   Text(
-                    "Paid by ${largest.paidBy}",
+                    "Paid by ${largestExpense.paidBy}",
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Text(
-                    "₱${largest.amount.toStringAsFixed(2)}",
+                    "₱${largestExpense.amount.toStringAsFixed(2)}",
                     style: const TextStyle(
-                      fontSize: 26,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Colors.green,
                     ),
@@ -128,20 +149,52 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           Card(
             child: ListTile(
               leading: const CircleAvatar(
                 child: Icon(Icons.emoji_events),
               ),
-              title: const Text("Top Spender"),
+              title: const Text(
+                "Top Spender",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               subtitle: Text(
-                AnalyticsService.topSpender(expenses) ??
-                    "No data",
+                topSpender ?? "No data",
               ),
             ),
           ),
+
+          const SizedBox(height: 32),
+
+          const Text(
+            "Charts",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          MonthlyChart(
+            data: AnalyticsService.monthlyTotals(
+              expenses,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          CategoryPieChart(
+            data: AnalyticsService.categoryTotals(
+              expenses,
+            ),
+          ),
+
+          const SizedBox(height: 40),
         ],
       ),
     );
@@ -164,21 +217,45 @@ class _SummaryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: .15),
-          child: Icon(
-            icon,
-            color: color,
-          ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 18,
         ),
-        title: Text(title),
-        trailing: Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor:
+              color.withValues(alpha: .15),
+              child: Icon(
+                icon,
+                color: color,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

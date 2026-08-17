@@ -1,4 +1,5 @@
 import '../../expenses/models/expense.dart';
+import '../../expenses/models/expense_category.dart';
 import '../../groups/models/group.dart';
 
 class AnalyticsService {
@@ -69,8 +70,45 @@ class AnalyticsService {
 
     if (totals.isEmpty) return null;
 
-    return totals.entries.reduce(
+    return totals.entries
+        .reduce(
           (a, b) => a.value > b.value ? a : b,
-    ).key;
+    )
+        .key;
+  }
+
+  static Map<ExpenseCategory, double> categoryTotals(
+      List<Expense> expenses,
+      ) {
+    final totals = <ExpenseCategory, double>{};
+
+    for (final expense in expenses) {
+      totals.update(
+        expense.category,
+            (value) => value + expense.amount,
+        ifAbsent: () => expense.amount,
+      );
+    }
+
+    return totals;
+  }
+
+  static Map<String, double> monthlyTotals(
+      List<Expense> expenses,
+      ) {
+    final totals = <String, double>{};
+
+    for (final expense in expenses) {
+      final key =
+          "${expense.createdAt.month}/${expense.createdAt.year}";
+
+      totals.update(
+        key,
+            (value) => value + expense.amount,
+        ifAbsent: () => expense.amount,
+      );
+    }
+
+    return totals;
   }
 }

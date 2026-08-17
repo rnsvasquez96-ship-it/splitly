@@ -4,9 +4,11 @@ import '../models/group.dart';
 import '../models/member.dart';
 import '../../expenses/models/expense.dart';
 import '../../expenses/presentation/screens/expense_form_screen.dart';
-import '../screens/add_member_screen.dart';
+import '../screens/member_form_screen.dart';
 import '../../settlements/presentation/balance_section.dart';
 import '../../settlements/presentation/settlement_section.dart';
+import '../../reports/services/pdf_service.dart';
+import '../../settlements/services/settlement_service.dart';
 
 
 class GroupDetailsScreen extends StatefulWidget {
@@ -21,6 +23,7 @@ class GroupDetailsScreen extends StatefulWidget {
   State<GroupDetailsScreen> createState() =>
       _GroupDetailsScreenState();
 
+
 }
 
 class _GroupDetailsScreenState
@@ -28,6 +31,15 @@ class _GroupDetailsScreenState
 
 late List<Member> _members;
 late List<Expense> _expenses;
+Future<void> _exportPdf() async {
+  final settlements =
+  SettlementService.calculate(_expenses);
+
+  await PdfService.generateReport(
+    group: widget.group,
+    settlements: settlements,
+  );
+}
 Future<void> _editExpense(int index) async {
   final Expense? updatedExpense =
   await Navigator.push<Expense>(
@@ -52,6 +64,32 @@ Future<void> _editExpense(int index) async {
   ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(
       content: Text("Expense updated"),
+    ),
+  );
+}
+Future<void> _editMember(int index) async {
+  final Member? updatedMember =
+  await Navigator.push<Member>(
+    context,
+    MaterialPageRoute(
+      builder: (_) => MemberFormScreen(
+        member: _members[index],
+      ),
+    ),
+  );
+
+  if (updatedMember == null) return;
+
+  setState(() {
+    _members[index] = updatedMember;
+    widget.group.members[index] = updatedMember;
+  });
+
+  if (!mounted) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text("Member updated"),
     ),
   );
 }
@@ -122,7 +160,7 @@ final Member? member =
 await Navigator.push<Member>(
 context,
 MaterialPageRoute(
-builder: (_) => const AddMemberScreen(),
+  builder: (_) => const MemberFormScreen(),
 ),
 );
 
@@ -274,6 +312,18 @@ padding: const EdgeInsets.all(20),
 
     SettlementSection(
       expenses: _expenses,
+    ),
+
+    const SizedBox(height: 20),
+
+    SizedBox(
+      width: double.infinity,
+      height: 55,
+      child: FilledButton.icon(
+        onPressed: _exportPdf,
+        icon: const Icon(Icons.picture_as_pdf),
+        label: const Text("Export PDF Report"),
+      ),
     ),
 
     const SizedBox(height: 80),
@@ -457,9 +507,11 @@ else
 ..._members.asMap().entries.map(
 (entry) {
 return _MemberCard(
-member: entry.value,
-onDelete: () =>
-_confirmDeleteMember(entry.key),
+  member: entry.value,
+  onEdit: () =>
+      _editMember(entry.key),
+  onDelete: () =>
+      _confirmDeleteMember(entry.key),
 );
 },
 ),
@@ -587,10 +639,12 @@ fontWeight: FontWeight.bold,
 
 class _MemberCard extends StatelessWidget {
   final Member member;
+  final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _MemberCard({
     required this.member,
+    required this.onEdit,
     required this.onDelete,
   });
 
@@ -625,12 +679,23 @@ class _MemberCard extends StatelessWidget {
           ),
         ),
         subtitle: const Text("Member"),
-        trailing: IconButton(
-          onPressed: onDelete,
-          icon: const Icon(
-            Icons.delete_outline,
-            color: Colors.red,
-          ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              onPressed: onEdit,
+              icon: const Icon(
+                Icons.edit_outlined,
+              ),
+            ),
+            IconButton(
+              onPressed: onDelete,
+              icon: const Icon(
+                Icons.delete_outline,
+                color: Colors.red,
+              ),
+            ),
+          ],
         ),
       ),
     );

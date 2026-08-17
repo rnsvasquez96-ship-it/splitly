@@ -2,18 +2,36 @@ import 'package:flutter/material.dart';
 
 import '../models/group.dart';
 
-class CreateGroupScreen extends StatefulWidget {
-  const CreateGroupScreen({super.key});
+class GroupFormScreen extends StatefulWidget {
+  final Group? group;
+
+  const GroupFormScreen({
+    super.key,
+    this.group,
+  });
 
   @override
-  State<CreateGroupScreen> createState() => _CreateGroupScreenState();
+  State<GroupFormScreen> createState() =>
+      _GroupFormScreenState();
 }
 
-class _CreateGroupScreenState extends State<CreateGroupScreen> {
+class _GroupFormScreenState
+    extends State<GroupFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.group != null) {
+      _nameController.text = widget.group!.name;
+      _descriptionController.text =
+          widget.group!.description;
+    }
+  }
 
   @override
   void dispose() {
@@ -22,15 +40,33 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     super.dispose();
   }
 
-  void _createGroup() {
+  void _saveGroup() {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
+    if (widget.group != null) {
+      widget.group!.name =
+          _nameController.text.trim();
+
+      widget.group!.description =
+          _descriptionController.text.trim();
+
+      Navigator.pop(
+        context,
+        widget.group,
+      );
+
+      return;
+    }
+
     final group = Group(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: DateTime.now()
+          .millisecondsSinceEpoch
+          .toString(),
       name: _nameController.text.trim(),
-      description: _descriptionController.text.trim(),
+      description:
+      _descriptionController.text.trim(),
       members: [],
       expenses: [],
     );
@@ -43,9 +79,15 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final editing = widget.group != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Create Group"),
+        title: Text(
+          editing
+              ? "Edit Group"
+              : "Create Group",
+        ),
       ),
       body: SafeArea(
         child: Form(
@@ -53,9 +95,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              const Text(
-                "Create a new group",
-                style: TextStyle(
+              Text(
+                editing
+                    ? "Edit Group"
+                    : "Create a new group",
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
@@ -63,9 +107,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
               const SizedBox(height: 8),
 
-              const Text(
-                "Create a group to split expenses with friends or family.",
-                style: TextStyle(
+              Text(
+                editing
+                    ? "Update your group information."
+                    : "Create a group to split expenses with friends or family.",
+                style: const TextStyle(
                   color: Colors.grey,
                 ),
               ),
@@ -79,7 +125,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   prefixIcon: Icon(Icons.groups),
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
                     return "Please enter a group name";
                   }
                   return null;
@@ -89,11 +136,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               const SizedBox(height: 20),
 
               TextFormField(
-                controller: _descriptionController,
+                controller:
+                _descriptionController,
                 maxLines: 3,
-                decoration: const InputDecoration(
+                decoration:
+                const InputDecoration(
                   labelText: "Description",
-                  prefixIcon: Icon(Icons.description),
+                  prefixIcon:
+                  Icon(Icons.description),
                 ),
               ),
 
@@ -102,12 +152,15 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               SizedBox(
                 height: 55,
                 child: FilledButton(
-                  onPressed: _createGroup,
-                  child: const Text(
-                    "Create Group",
-                    style: TextStyle(
+                  onPressed: _saveGroup,
+                  child: Text(
+                    editing
+                        ? "Save Changes"
+                        : "Create Group",
+                    style: const TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontWeight:
+                      FontWeight.bold,
                     ),
                   ),
                 ),

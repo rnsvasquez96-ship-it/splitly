@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/group.dart';
 import '../repository/group_repository.dart';
-import '../screens/create_group_screen.dart';
+import '../screens/group_form_screen.dart';
 import 'group_details_screen.dart';
 
 class GroupsScreen extends StatefulWidget {
@@ -13,12 +13,45 @@ class GroupsScreen extends StatefulWidget {
 }
 
 class _GroupsScreenState extends State<GroupsScreen> {
-  final GroupRepository _repository = GroupRepository.instance;
+  final GroupRepository _repository =
+      GroupRepository.instance;
+
+  final TextEditingController _searchController =
+  TextEditingController();
+
+  String _search = "";
+
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     _loadGroups();
+  }
+
+  Future<void> _editGroup(Group group) async {
+    final Group? updatedGroup =
+    await Navigator.push<Group>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GroupFormScreen(
+          group: group,
+        ),
+      ),
+    );
+
+    if (updatedGroup == null) return;
+
+    await _repository.saveGroups();
+
+    if (!mounted) return;
+
+    setState(() {});
   }
 
   Future<void> _loadGroups() async {
@@ -33,7 +66,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
     final Group? group = await Navigator.push<Group>(
       context,
       MaterialPageRoute(
-        builder: (_) => const CreateGroupScreen(),
+        builder: (_) => const GroupFormScreen(),
       ),
     );
 
@@ -73,7 +106,18 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final groups = _repository.getGroups();
+    final groups = _repository
+        .getGroups()
+        .where(
+          (group) =>
+      group.name
+          .toLowerCase()
+          .contains(_search.toLowerCase()) ||
+          group.description
+              .toLowerCase()
+              .contains(_search.toLowerCase()),
+    )
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -89,43 +133,81 @@ class _GroupsScreenState extends State<GroupsScreen> {
         icon: const Icon(Icons.add),
         label: const Text("Create Group"),
       ),
-      body: groups.isEmpty
-          ? const _EmptyState()
-          : ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: groups.length,
-        itemBuilder: (context, index) {
-          final group = groups[index];
-
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor:
-                Theme.of(context).colorScheme.primaryContainer,
-                child: const Icon(Icons.groups),
-              ),
-              title: Text(
-                group.name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: "Search groups...",
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
+                filled: true,
+                fillColor: Colors.white,
               ),
-              subtitle: Text(
-                "${group.members.length} members",
-              ),
-              trailing: IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: Colors.red,
-                ),
-                onPressed: () => _deleteGroup(group),
-              ),
-              onTap: () => _openGroup(group),
+              onChanged: (value) {
+                setState(() {
+                  _search = value;
+                });
+              },
             ),
-          );
-        },
+          ),
+
+          Expanded(
+            child: groups.isEmpty
+                ? const _EmptyState()
+                : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: groups.length,
+              itemBuilder: (context, index) {
+                final group = groups[index];
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .primaryContainer,
+                      child: const Icon(Icons.groups),
+                    ),
+                    title: Text(
+                      group.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      "${group.members.length} members",
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () => _editGroup(group),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                          ),
+                          onPressed: () => _deleteGroup(group),
+                        ),
+                      ],
+                    ),
+                    onTap: () => _openGroup(group),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
+
     );
   }
 }

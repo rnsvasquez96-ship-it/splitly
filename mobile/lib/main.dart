@@ -1,10 +1,16 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'firebase_options.dart';
 import 'app/theme/app_theme.dart';
 import 'features/auth/presentation/splash_page.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(const SplitlyApp());
 }
@@ -20,7 +26,11 @@ class SplitlyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home: const SplashPage(),
+      home: const Scaffold(
+        body: Center(
+          child: Text("Splitly is working!"),
+        ),
+      ),
     );
   }
 }
