@@ -122,11 +122,13 @@ class _AddGroupExpenseScreenState
           ),
 
           DropdownButtonFormField<String>(
-            value: _paidBy,
-            isExpanded: true,
+            initialValue: _paidBy,
+            decoration: const InputDecoration(
+              labelText: "Paid By",
+            ),
             items: widget.group.members
                 .map(
-                  (member) => DropdownMenuItem(
+                  (member) => DropdownMenuItem<String>(
                 value: member.name,
                 child: Text(member.name),
               ),

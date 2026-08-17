@@ -5,6 +5,8 @@ import '../models/member.dart';
 import '../../expenses/models/expense.dart';
 import '../../expenses/presentation/screens/add_group_expense_screen.dart';
 import '../screens/add_member_screen.dart';
+import '../../settlements/presentation/balance_section.dart';
+import '../../settlements/presentation/settlement_section.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
   final Group group;
@@ -177,16 +179,36 @@ FontWeight.bold,
 ),      body: SafeArea(
 child: ListView(
 padding: const EdgeInsets.all(20),
-children: [
-_buildGroupHeader(),
-const SizedBox(height: 24),
-_buildTotalCard(),
-const SizedBox(height: 28),
-_buildMembersSection(),
-const SizedBox(height: 28),
-_buildExpensesSection(),
-const SizedBox(height: 80),
-],
+  children: [
+    _buildGroupHeader(),
+
+    const SizedBox(height: 24),
+
+    _buildTotalCard(),
+
+    const SizedBox(height: 28),
+
+    _buildMembersSection(),
+
+    const SizedBox(height: 28),
+
+    _buildExpensesSection(),
+
+    // NEW
+    const SizedBox(height: 28),
+
+    BalanceSection(
+      expenses: _expenses,
+    ),
+
+    const SizedBox(height: 28),
+
+    SettlementSection(
+      expenses: _expenses,
+    ),
+
+    const SizedBox(height: 80),
+  ],
 ),
 ),
 floatingActionButton: Column(
@@ -377,6 +399,8 @@ _confirmDeleteMember(entry.key),
 }
 
 Widget _buildExpensesSection() {
+
+
 return Column(
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
@@ -398,6 +422,7 @@ label: const Text("Add"),
 ),
 ],
 ),
+
 
 const SizedBox(height: 12),
 
@@ -431,6 +456,7 @@ textAlign: TextAlign.center,
 else
 ..._expenses.map(
 (expense) {
+
 return Card(
 margin:
 const EdgeInsets.only(bottom: 10),
