@@ -16,37 +16,40 @@ State<GroupDetailsScreen> createState() => _GroupDetailsScreenState();
 }
 
 class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
-late List<Map<String, dynamic>> _members;
-late List<Map<String, dynamic>> _expenses;
+List<Map<String, dynamic>> _members = [];
+List<Map<String, dynamic>> _expenses = [];
 
 @override
 void initState() {
 super.initState();
+_loadGroupData();
+}
 
-final savedMembers = widget.group['members'];
+void _loadGroupData() {
+final dynamic savedMembers = widget.group['members'];
 
 if (savedMembers is List) {
 _members = savedMembers
-    .whereType<Map>()
-    .map(
-(member) => Map<String, dynamic>.from(member),
+    .where((item) => item is Map)
+    .map<Map<String, dynamic>>(
+(item) => Map<String, dynamic>.from(
+item as Map,
+),
 )
     .toList();
-} else {
-_members = [];
 }
 
-final savedExpenses = widget.group['expenses'];
+final dynamic savedExpenses = widget.group['expenses'];
 
 if (savedExpenses is List) {
 _expenses = savedExpenses
-    .whereType<Map>()
-    .map(
-(expense) => Map<String, dynamic>.from(expense),
+    .where((item) => item is Map)
+    .map<Map<String, dynamic>>(
+(item) => Map<String, dynamic>.from(
+item as Map,
+),
 )
     .toList();
-} else {
-_expenses = [];
 }
 }
 
@@ -59,22 +62,22 @@ return widget.group['description']?.toString() ?? '';
 }
 
 double get _totalExpenses {
-return _expenses.fold(
-0.0,
-(total, expense) {
-final value = expense['amount'];
+double total = 0;
+
+for (final expense in _expenses) {
+final dynamic value = expense['amount'];
 
 if (value is num) {
-return total + value.toDouble();
+total += value.toDouble();
+}
 }
 
 return total;
-},
-);
 }
 
 Future<void> _addMember() async {
-final result = await Navigator.push<Map<String, dynamic>>(
+final Map<String, dynamic>? result =
+await Navigator.push<Map<String, dynamic>>(
 context,
 MaterialPageRoute(
 builder: (_) => const AddMemberScreen(),
@@ -85,19 +88,55 @@ if (!mounted || result == null) {
 return;
 }
 
+final String name = result['name']?.toString().trim() ?? '';
+
+if (name.isEmpty) {
+return;
+}
+
+final Map<String, dynamic> member = {
+'name': name,
+'avatar': name.substring(0, 1).toUpperCase(),
+};
+
 setState(() {
-_members.add(result);
+_members.add(member);
 });
 
-widget.group['members'] = _members;
+widget.group['members'] = List<Map<String, dynamic>>.from(_members);
+
+if (!mounted) {
+return;
+}
+
+ScaffoldMessenger.of(context).showSnackBar(
+SnackBar(
+content: Text('$name added to the group'),
+duration: const Duration(seconds: 2),
+),
+);
 }
 
 void _deleteMember(int index) {
+if (index < 0 || index >= _members.length) {
+return;
+}
+
+final String name =
+_members[index]['name']?.toString() ?? 'Member';
+
 setState(() {
 _members.removeAt(index);
 });
 
-widget.group['members'] = _members;
+widget.group['members'] = List<Map<String, dynamic>>.from(_members);
+
+ScaffoldMessenger.of(context).showSnackBar(
+SnackBar(
+content: Text('$name removed from the group'),
+duration: const Duration(seconds: 2),
+),
+);
 }
 
 @override
@@ -116,19 +155,12 @@ child: ListView(
 padding: const EdgeInsets.all(20),
 children: [
 _buildGroupHeader(),
-
 const SizedBox(height: 24),
-
 _buildTotalCard(),
-
 const SizedBox(height: 28),
-
 _buildMembersSection(),
-
 const SizedBox(height: 28),
-
 _buildExpensesSection(),
-
 const SizedBox(height: 40),
 ],
 ),
@@ -165,9 +197,7 @@ color: Colors.white,
 size: 32,
 ),
 ),
-
 const SizedBox(height: 18),
-
 Text(
 _groupName,
 style: const TextStyle(
@@ -176,7 +206,6 @@ fontSize: 25,
 fontWeight: FontWeight.w800,
 ),
 ),
-
 if (_description.isNotEmpty) ...[
 const SizedBox(height: 7),
 Text(
@@ -188,9 +217,7 @@ height: 1.4,
 ),
 ),
 ],
-
 const SizedBox(height: 18),
-
 Text(
 '${_members.length} ${_members.length == 1 ? 'member' : 'members'}',
 style: const TextStyle(
@@ -227,9 +254,7 @@ Icons.payments_outlined,
 color: Color(0xFF5B5FEF),
 ),
 ),
-
 const SizedBox(width: 16),
-
 Expanded(
 child: Column(
 crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,20 +304,18 @@ label: const Text('Add'),
 ),
 ],
 ),
-
 const SizedBox(height: 12),
-
 if (_members.isEmpty)
 _buildEmptyMembers()
 else
 ..._members.asMap().entries.map(
 (entry) {
-final index = entry.key;
-final member = entry.value;
+final int index = entry.key;
+final Map<String, dynamic> member = entry.value;
 
 return _MemberCard(
 member: member,
-onDelete: () => _deleteMember(index),
+onDelete: () => _confirmDeleteMember(index),
 );
 },
 ),
@@ -338,6 +361,45 @@ color: Colors.grey,
 );
 }
 
+Future<void> _confirmDeleteMember(int index) async {
+if (index < 0 || index >= _members.length) {
+return;
+}
+
+final String name =
+_members[index]['name']?.toString() ?? 'this member';
+
+final bool? confirmed = await showDialog<bool>(
+context: context,
+builder: (dialogContext) {
+return AlertDialog(
+title: const Text('Remove member?'),
+content: Text(
+'Remove $name from the group?',
+),
+actions: [
+TextButton(
+onPressed: () {
+Navigator.of(dialogContext).pop(false);
+},
+child: const Text('Cancel'),
+),
+FilledButton(
+onPressed: () {
+Navigator.of(dialogContext).pop(true);
+},
+child: const Text('Remove'),
+),
+],
+);
+},
+);
+
+if (confirmed == true && mounted) {
+_deleteMember(index);
+}
+}
+
 Widget _buildExpensesSection() {
 return Column(
 crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,9 +411,7 @@ fontSize: 21,
 fontWeight: FontWeight.w800,
 ),
 ),
-
 const SizedBox(height: 12),
-
 if (_expenses.isEmpty)
 Container(
 width: double.infinity,
@@ -391,16 +451,16 @@ color: Colors.grey,
 else
 ..._expenses.map(
 (expense) {
-final name =
+final String name =
 expense['name']?.toString() ?? 'Expense';
 
-final amountValue = expense['amount'];
+final dynamic amountValue = expense['amount'];
 
-final amount = amountValue is num
+final double amount = amountValue is num
 ? amountValue.toDouble()
     : 0.0;
 
-final paidBy =
+final String paidBy =
 expense['paidBy']?.toString() ?? 'Me';
 
 return Card(
@@ -415,7 +475,9 @@ style: const TextStyle(
 fontWeight: FontWeight.w700,
 ),
 ),
-subtitle: Text('Paid by $paidBy'),
+subtitle: Text(
+'Paid by $paidBy',
+),
 trailing: Text(
 '₱${amount.toStringAsFixed(2)}',
 style: const TextStyle(
@@ -442,11 +504,12 @@ required this.onDelete,
 
 @override
 Widget build(BuildContext context) {
-final name = member['name']?.toString() ?? 'Unknown';
+final String name =
+member['name']?.toString().trim() ?? 'Unknown';
 
-final avatarLetter = name.trim().isEmpty
+final String avatarLetter = name.isEmpty
 ? '?'
-    : name.trim()[0].toUpperCase();
+    : name.substring(0, 1).toUpperCase();
 
 return Card(
 margin: const EdgeInsets.only(bottom: 10),
@@ -456,6 +519,7 @@ horizontal: 14,
 vertical: 5,
 ),
 leading: CircleAvatar(
+radius: 24,
 backgroundColor:
 const Color(0xFF5B5FEF).withValues(alpha: 0.12),
 foregroundColor: const Color(0xFF5B5FEF),
@@ -463,6 +527,7 @@ child: Text(
 avatarLetter,
 style: const TextStyle(
 fontWeight: FontWeight.w800,
+fontSize: 17,
 ),
 ),
 ),
@@ -474,9 +539,8 @@ fontWeight: FontWeight.w700,
 ),
 subtitle: const Text('Member'),
 trailing: IconButton(
-onPressed: () {
-_confirmDelete(context);
-},
+tooltip: 'Remove member',
+onPressed: onDelete,
 icon: const Icon(
 Icons.delete_outline,
 color: Colors.red,
@@ -485,33 +549,5 @@ color: Colors.red,
 ),
 );
 }
+}
 
-void _confirmDelete(BuildContext context) {
-showDialog<void>(
-context: context,
-builder: (context) {
-return AlertDialog(
-title: const Text('Remove member?'),
-content: Text(
-'Remove ${member['name'] ?? 'this member'} from the group?',
-),
-actions: [
-TextButton(
-onPressed: () {
-Navigator.pop(context);
-},
-child: const Text('Cancel'),
-),
-FilledButton(
-onPressed: () {
-Navigator.pop(context);
-onDelete();
-},
-child: const Text('Remove'),
-),
-],
-);
-},
-);
-}
-}
