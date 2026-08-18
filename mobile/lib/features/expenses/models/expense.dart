@@ -45,4 +45,10 @@ class Expense {
       ),
     );
   }
+
+  // Firestore compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  factory Expense.fromJson(Map<String, dynamic> json) =>
+      Expense.fromMap(json);
 }

@@ -16,31 +16,31 @@ class Group {
     required this.expenses,
   });
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
       'description': description,
-      'members': members.map((m) => m.toMap()).toList(),
-      'expenses': expenses.map((e) => e.toMap()).toList(),
+      'members': members.map((m) => m.toJson()).toList(),
+      'expenses': expenses.map((e) => e.toJson()).toList(),
     };
   }
 
-  factory Group.fromMap(Map<String, dynamic> map) {
+  factory Group.fromJson(Map<String, dynamic> json) {
     return Group(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      description: map['description'] as String? ?? '',
-      members: (map['members'] as List<dynamic>? ?? [])
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String? ?? '',
+      members: (json['members'] as List<dynamic>? ?? [])
           .map(
-            (member) => Member.fromMap(
+            (member) => Member.fromJson(
           Map<String, dynamic>.from(member),
         ),
       )
           .toList(),
-      expenses: (map['expenses'] as List<dynamic>? ?? [])
+      expenses: (json['expenses'] as List<dynamic>? ?? [])
           .map(
-            (expense) => Expense.fromMap(
+            (expense) => Expense.fromJson(
           Map<String, dynamic>.from(expense),
         ),
       )
@@ -63,4 +63,10 @@ class Group {
       expenses: expenses ?? this.expenses,
     );
   }
+
+  // Compatibility with existing code
+  Map<String, dynamic> toMap() => toJson();
+
+  factory Group.fromMap(Map<String, dynamic> map) =>
+      Group.fromJson(map);
 }

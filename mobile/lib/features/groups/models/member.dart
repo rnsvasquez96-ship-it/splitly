@@ -16,8 +16,14 @@ class Member {
 
   factory Member.fromMap(Map<String, dynamic> map) {
     return Member(
-      id: map['id'],
-      name: map['name'],
+      id: map['id'] as String,
+      name: map['name'] as String,
     );
   }
+
+  // Firestore compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  factory Member.fromJson(Map<String, dynamic> json) =>
+      Member.fromMap(json);
 }
