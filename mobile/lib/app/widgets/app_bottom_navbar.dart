@@ -15,7 +15,7 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      minimum: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      minimum: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: Container(
         height: 72,
         decoration: BoxDecoration(
@@ -30,7 +30,6 @@ class AppBottomNavBar extends StatelessWidget {
           ],
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _NavItem(
               icon: Icons.home_rounded,
@@ -45,16 +44,22 @@ class AppBottomNavBar extends StatelessWidget {
               onTap: () => onTap(1),
             ),
             _NavItem(
-              icon: Icons.analytics_rounded,
-              label: "Analytics",
+              icon: Icons.account_balance_wallet_rounded,
+              label: "Budget",
               selected: currentIndex == 2,
               onTap: () => onTap(2),
             ),
             _NavItem(
-              icon: Icons.settings_rounded,
-              label: "Settings",
+              icon: Icons.analytics_rounded,
+              label: "Analytics",
               selected: currentIndex == 3,
               onTap: () => onTap(3),
+            ),
+            _NavItem(
+              icon: Icons.settings_rounded,
+              label: "Settings",
+              selected: currentIndex == 4,
+              onTap: () => onTap(4),
             ),
           ],
         ),
@@ -78,8 +83,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-    selected ? AppColors.primary : Colors.grey.shade500;
+    final color = selected ? AppColors.primary : Colors.grey.shade500;
 
     return Expanded(
       child: InkWell(
@@ -87,10 +91,7 @@ class _NavItem extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
-          margin: const EdgeInsets.symmetric(
-            horizontal: 6,
-            vertical: 8,
-          ),
+          margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
           decoration: BoxDecoration(
             color: selected
                 ? AppColors.primary.withValues(alpha: .12)
@@ -101,22 +102,19 @@ class _NavItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AnimatedScale(
-                scale: selected ? 1.15 : 1,
+                scale: selected ? 1.12 : 1,
                 duration: const Duration(milliseconds: 250),
-                child: Icon(
-                  icon,
-                  color: color,
-                ),
+                child: Icon(icon, color: color, size: 23),
               ),
               const SizedBox(height: 4),
               Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: color,
-                  fontSize: 12,
-                  fontWeight: selected
-                      ? FontWeight.w700
-                      : FontWeight.w500,
+                  fontSize: 10,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
             ],

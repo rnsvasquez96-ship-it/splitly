@@ -20,57 +20,72 @@ class StatCard extends StatelessWidget {
 
   double get _numericValue {
     return double.tryParse(
-      value.replaceAll("₱", "").replaceAll(",", ""),
-    ) ??
+          value.replaceAll("₱", "").replaceAll(",", "").trim(),
+        ) ??
         0;
+  }
+
+  String get _subtitle {
+    switch (title.toLowerCase()) {
+      case "groups":
+        return "Active groups";
+
+      case "expenses":
+        return "Total spending";
+
+      case "members":
+        return "Across groups";
+
+      case "transactions":
+        return "Recorded";
+
+      case "average":
+        return "Per expense";
+
+      default:
+        return "Overview";
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: .05),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.withValues(alpha: .10)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: .12),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: .10),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(icon, color: color, size: 21),
+              ),
+
+              const Spacer(),
+
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: .07),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.north_east_rounded, color: color, size: 14),
+              ),
+            ],
           ),
 
           const Spacer(),
-
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-
-          const SizedBox(height: 6),
 
           FittedBox(
             fit: BoxFit.scaleDown,
@@ -78,13 +93,36 @@ class StatCard extends StatelessWidget {
             child: AnimatedCounter(
               value: _numericValue,
               prefix: _isCurrency ? "₱" : "",
-              duration: 1000,
+              decimals: _isCurrency ? 0 : 0,
+              duration: 900,
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 25,
                 fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
-                color: Colors.black87,
+                letterSpacing: -.7,
+                color: Color(0xFF202124),
               ),
+            ),
+          ),
+
+          const SizedBox(height: 5),
+
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+          ),
+
+          const SizedBox(height: 2),
+
+          Text(
+            _subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey.shade500,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

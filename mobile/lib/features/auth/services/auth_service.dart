@@ -17,10 +17,7 @@ class AuthService {
     required String email,
     required String password,
   }) {
-    return _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    return _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
   Future<UserCredential> register({
@@ -34,9 +31,7 @@ class AuthService {
   }
 
   Future<void> resetPassword(String email) {
-    return _auth.sendPasswordResetEmail(
-      email: email,
-    );
+    return _auth.sendPasswordResetEmail(email: email);
   }
 
   Future<void> signOut() {

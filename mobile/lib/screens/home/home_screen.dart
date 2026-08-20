@@ -33,10 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final expenses = savedExpenses
-        .map(
-          (expense) =>
-      Map<String, dynamic>.from(jsonDecode(expense) as Map),
-    )
+        .map((expense) => Map<String, dynamic>.from(jsonDecode(expense) as Map))
         .toList();
 
     if (!mounted) {
@@ -51,9 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _saveExpenses() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final expenses = _expenses
-        .map((expense) => jsonEncode(expense))
-        .toList();
+    final expenses = _expenses.map((expense) => jsonEncode(expense)).toList();
 
     await prefs.setStringList(_expensesKey, expenses);
   }
@@ -61,9 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _openAddExpense() async {
     final expense = await Navigator.push<Map<String, dynamic>>(
       context,
-      MaterialPageRoute(
-        builder: (_) => const AddExpenseScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
     );
 
     if (expense == null) {
@@ -86,13 +79,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   double get _totalExpenses {
-    return _expenses.fold(
-      0.0,
-          (total, expense) {
-        final amount = (expense['amount'] as num).toDouble();
-        return total + amount;
-      },
-    );
+    return _expenses.fold(0.0, (total, expense) {
+      final amount = (expense['amount'] as num).toDouble();
+      return total + amount;
+    });
   }
 
   @override
@@ -101,9 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text(
           'Splitly',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
       body: SafeArea(
@@ -112,18 +100,14 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Good day 👋',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
+              Text('Good day 👋', style: Theme.of(context).textTheme.bodyLarge),
 
               const SizedBox(height: 6),
 
               Text(
                 'Your expenses',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: Theme.of(context).textTheme.headlineMedium
+                    ?.copyWith(fontWeight: FontWeight.w800),
               ),
 
               const SizedBox(height: 24),
@@ -141,10 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     const Text(
                       'Total Expenses',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 15,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 15),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -170,10 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.add),
                   label: const Text(
                     'Add Expense',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -182,9 +160,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
               Text(
                 'Recent Expenses',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: Theme.of(context).textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w800),
               ),
 
               const SizedBox(height: 12),
@@ -199,10 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: const Column(
                     children: [
-                      Icon(
-                        Icons.receipt_long_outlined,
-                        size: 48,
-                      ),
+                      Icon(Icons.receipt_long_outlined, size: 48),
                       SizedBox(height: 12),
                       Text(
                         'No expenses yet',
@@ -225,15 +199,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _expenses.length,
                   separatorBuilder: (context, index) =>
-                  const SizedBox(height: 10),
+                      const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final expense = _expenses[index];
 
                     final name = expense['name'] as String;
-                    final description =
-                    expense['description'] as String;
-                    final amount =
-                    (expense['amount'] as num).toDouble();
+                    final description = expense['description'] as String;
+                    final amount = (expense['amount'] as num).toDouble();
 
                     return Card(
                       child: ListTile(
@@ -242,14 +214,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         title: Text(
                           name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                         subtitle: Text(
-                          description.isEmpty
-                              ? 'No description'
-                              : description,
+                          description.isEmpty ? 'No description' : description,
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -261,9 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline,
-                              ),
+                              icon: const Icon(Icons.delete_outline),
                               onPressed: () {
                                 _deleteExpense(index);
                               },

@@ -19,7 +19,6 @@ class PdfService {
         pageFormat: PdfPageFormat.a4,
         build: (context) {
           return [
-
             pw.Header(
               level: 0,
               child: pw.Text(
@@ -35,47 +34,29 @@ class PdfService {
 
             pw.Text(
               "Group: ${group.name}",
-              style: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 18,
-              ),
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 18),
             ),
 
-            if (group.description.isNotEmpty)
-              pw.Text(group.description),
+            if (group.description.isNotEmpty) pw.Text(group.description),
 
             pw.SizedBox(height: 20),
 
             pw.Text(
               "Members",
-              style: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 18,
-              ),
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 18),
             ),
 
-            pw.Bullet(
-              text: group.members
-                  .map((e) => e.name)
-                  .join("\n"),
-            ),
+            pw.Bullet(text: group.members.map((e) => e.name).join("\n")),
 
             pw.SizedBox(height: 20),
 
             pw.Text(
               "Expenses",
-              style: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 18,
-              ),
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 18),
             ),
 
-            pw.Table.fromTextArray(
-              headers: const [
-                "Title",
-                "Paid By",
-                "Amount"
-              ],
+            pw.TableHelper.fromTextArray(
+              headers: const ["Title", "Paid By", "Amount"],
               data: group.expenses.map((expense) {
                 return [
                   expense.title,
@@ -89,24 +70,13 @@ class PdfService {
 
             pw.Text(
               "Suggested Settlements",
-              style: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 18,
-              ),
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 18),
             ),
 
-            pw.Table.fromTextArray(
-              headers: const [
-                "From",
-                "To",
-                "Amount",
-              ],
+            pw.TableHelper.fromTextArray(
+              headers: const ["From", "To", "Amount"],
               data: settlements.map((s) {
-                return [
-                  s.from,
-                  s.to,
-                  "₱${s.amount.toStringAsFixed(2)}",
-                ];
+                return [s.from, s.to, "₱${s.amount.toStringAsFixed(2)}"];
               }).toList(),
             ),
 
@@ -114,17 +84,13 @@ class PdfService {
 
             pw.Align(
               alignment: pw.Alignment.centerRight,
-              child: pw.Text(
-                "Generated: ${DateTime.now()}",
-              ),
+              child: pw.Text("Generated: ${DateTime.now()}"),
             ),
           ];
         },
       ),
     );
 
-    await Printing.layoutPdf(
-      onLayout: (format) async => pdf.save(),
-    );
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 }

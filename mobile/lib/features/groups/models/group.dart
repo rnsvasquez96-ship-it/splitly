@@ -32,18 +32,12 @@ class Group {
       name: json['name'] as String,
       description: json['description'] as String? ?? '',
       members: (json['members'] as List<dynamic>? ?? [])
-          .map(
-            (member) => Member.fromJson(
-          Map<String, dynamic>.from(member),
-        ),
-      )
+          .map((member) => Member.fromJson(Map<String, dynamic>.from(member)))
           .toList(),
       expenses: (json['expenses'] as List<dynamic>? ?? [])
           .map(
-            (expense) => Expense.fromJson(
-          Map<String, dynamic>.from(expense),
-        ),
-      )
+            (expense) => Expense.fromJson(Map<String, dynamic>.from(expense)),
+          )
           .toList(),
     );
   }
@@ -67,6 +61,5 @@ class Group {
   // Compatibility with existing code
   Map<String, dynamic> toMap() => toJson();
 
-  factory Group.fromMap(Map<String, dynamic> map) =>
-      Group.fromJson(map);
+  factory Group.fromMap(Map<String, dynamic> map) => Group.fromJson(map);
 }

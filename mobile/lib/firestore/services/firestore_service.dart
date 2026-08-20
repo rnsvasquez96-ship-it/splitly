@@ -6,18 +6,12 @@ class FirestoreService {
 
   static final instance = FirestoreService._();
 
-  final FirebaseFirestore _db =
-      FirebaseFirestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  final FirebaseAuth _auth =
-      FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String get uid => _auth.currentUser!.uid;
 
-  CollectionReference<Map<String, dynamic>>
-  get groups =>
-      _db
-          .collection("users")
-          .doc(uid)
-          .collection("groups");
+  CollectionReference<Map<String, dynamic>> get groups =>
+      _db.collection("users").doc(uid).collection("groups");
 }

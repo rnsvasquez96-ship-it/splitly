@@ -40,7 +40,7 @@ class Expense {
       splitBetween: List<String>.from(map['splitBetween']),
       createdAt: DateTime.parse(map['createdAt'] as String),
       category: ExpenseCategory.values.firstWhere(
-            (e) => e.name == map['category'],
+        (e) => e.name == map['category'],
         orElse: () => ExpenseCategory.other,
       ),
     );
@@ -49,6 +49,5 @@ class Expense {
   // Firestore compatibility
   Map<String, dynamic> toJson() => toMap();
 
-  factory Expense.fromJson(Map<String, dynamic> json) =>
-      Expense.fromMap(json);
+  factory Expense.fromJson(Map<String, dynamic> json) => Expense.fromMap(json);
 }

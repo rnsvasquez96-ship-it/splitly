@@ -22,10 +22,7 @@ class AppTextStyles {
     color: AppColors.textSecondary,
   );
 
-  static const body = TextStyle(
-    fontSize: 15,
-    color: AppColors.textPrimary,
-  );
+  static const body = TextStyle(fontSize: 15, color: AppColors.textPrimary);
 
   static const caption = TextStyle(
     fontSize: 13,

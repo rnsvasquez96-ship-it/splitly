@@ -15,8 +15,8 @@ class SettlementHistoryService {
 
   bool isSettled(Settlement settlement) {
     return _history.any(
-          (s) =>
-      s.from == settlement.from &&
+      (s) =>
+          s.from == settlement.from &&
           s.to == settlement.to &&
           (s.amount - settlement.amount).abs() < 0.01,
     );

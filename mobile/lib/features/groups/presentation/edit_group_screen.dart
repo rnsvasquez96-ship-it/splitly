@@ -5,18 +5,13 @@ import '../models/group.dart';
 class EditGroupScreen extends StatefulWidget {
   final Group group;
 
-  const EditGroupScreen({
-    super.key,
-    required this.group,
-  });
+  const EditGroupScreen({super.key, required this.group});
 
   @override
-  State<EditGroupScreen> createState() =>
-      _EditGroupScreenState();
+  State<EditGroupScreen> createState() => _EditGroupScreenState();
 }
 
-class _EditGroupScreenState
-    extends State<EditGroupScreen> {
+class _EditGroupScreenState extends State<EditGroupScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _nameController;
@@ -26,13 +21,11 @@ class _EditGroupScreenState
   void initState() {
     super.initState();
 
-    _nameController =
-        TextEditingController(text: widget.group.name);
+    _nameController = TextEditingController(text: widget.group.name);
 
-    _descriptionController =
-        TextEditingController(
-          text: widget.group.description,
-        );
+    _descriptionController = TextEditingController(
+      text: widget.group.description,
+    );
   }
 
   @override
@@ -46,8 +39,7 @@ class _EditGroupScreenState
     if (!_formKey.currentState!.validate()) return;
 
     widget.group.name = _nameController.text.trim();
-    widget.group.description =
-        _descriptionController.text.trim();
+    widget.group.description = _descriptionController.text.trim();
 
     Navigator.pop(context, widget.group);
   }
@@ -55,9 +47,7 @@ class _EditGroupScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit Group"),
-      ),
+      appBar: AppBar(title: const Text("Edit Group")),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -65,12 +55,9 @@ class _EditGroupScreenState
           children: [
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: "Group Name",
-              ),
+              decoration: const InputDecoration(labelText: "Group Name"),
               validator: (value) {
-                if (value == null ||
-                    value.trim().isEmpty) {
+                if (value == null || value.trim().isEmpty) {
                   return "Required";
                 }
                 return null;
@@ -82,19 +69,12 @@ class _EditGroupScreenState
             TextFormField(
               controller: _descriptionController,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: "Description",
-              ),
+              decoration: const InputDecoration(labelText: "Description"),
             ),
 
             const SizedBox(height: 40),
 
-            FilledButton(
-              onPressed: _save,
-              child: const Text(
-                "Save Changes",
-              ),
-            ),
+            FilledButton(onPressed: _save, child: const Text("Save Changes")),
           ],
         ),
       ),

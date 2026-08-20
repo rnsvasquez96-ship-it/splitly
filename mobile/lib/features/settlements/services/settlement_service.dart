@@ -2,27 +2,20 @@ import '../../expenses/models/expense.dart';
 import '../models/settlement.dart';
 
 class SettlementService {
-  static List<Settlement> calculate(
-      List<Expense> expenses,
-      ) {
+  static List<Settlement> calculate(List<Expense> expenses) {
     final balances = <String, double>{};
 
     for (final expense in expenses) {
-      final share =
-          expense.amount / expense.splitBetween.length;
+      final share = expense.amount / expense.splitBetween.length;
 
       balances.update(
         expense.paidBy,
-            (v) => v + expense.amount,
+        (v) => v + expense.amount,
         ifAbsent: () => expense.amount,
       );
 
       for (final member in expense.splitBetween) {
-        balances.update(
-          member,
-              (v) => v - share,
-          ifAbsent: () => -share,
-        );
+        balances.update(member, (v) => v - share, ifAbsent: () => -share);
       }
     }
 
@@ -42,13 +35,13 @@ class SettlementService {
     int i = 0;
     int j = 0;
 
-    while (i < debtors.length &&
-        j < creditors.length) {
+    while (i < debtors.length && j < creditors.length) {
       final debtor = debtors[i];
       final creditor = creditors[j];
 
-      final double amount =
-      (-debtor.value).clamp(0.0, creditor.value).toDouble();
+      final double amount = (-debtor.value)
+          .clamp(0.0, creditor.value)
+          .toDouble();
 
       settlements.add(
         Settlement(
@@ -60,13 +53,9 @@ class SettlementService {
         ),
       );
 
-      debtors[i] =
-          MapEntry(debtor.key, debtor.value + amount);
+      debtors[i] = MapEntry(debtor.key, debtor.value + amount);
 
-      creditors[j] = MapEntry(
-        creditor.key,
-        creditor.value - amount,
-      );
+      creditors[j] = MapEntry(creditor.key, creditor.value - amount);
 
       if (debtors[i].value.abs() < 0.01) {
         i++;

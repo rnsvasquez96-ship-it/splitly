@@ -5,10 +5,7 @@ import '../../expenses/models/expense.dart';
 class BalanceSection extends StatelessWidget {
   final List<Expense> expenses;
 
-  const BalanceSection({
-    super.key,
-    required this.expenses,
-  });
+  const BalanceSection({super.key, required this.expenses});
 
   Map<String, double> _calculateBalances() {
     final Map<String, double> balances = {};
@@ -17,8 +14,7 @@ class BalanceSection extends StatelessWidget {
       final share = expense.amount / expense.splitBetween.length;
 
       balances.putIfAbsent(expense.paidBy, () => 0);
-      balances[expense.paidBy] =
-          balances[expense.paidBy]! + expense.amount;
+      balances[expense.paidBy] = balances[expense.paidBy]! + expense.amount;
 
       for (final member in expense.splitBetween) {
         balances.putIfAbsent(member, () => 0);
@@ -38,10 +34,7 @@ class BalanceSection extends StatelessWidget {
       children: [
         const Text(
           "Balances",
-          style: TextStyle(
-            fontSize: 21,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
         ),
 
         const SizedBox(height: 12),
@@ -60,9 +53,7 @@ class BalanceSection extends StatelessWidget {
                   SizedBox(height: 10),
                   Text(
                     "No balances yet",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 6),
                   Text(
@@ -74,54 +65,46 @@ class BalanceSection extends StatelessWidget {
             ),
           )
         else
-          ...balances.entries.map(
-                (entry) {
-              final value = entry.value;
+          ...balances.entries.map((entry) {
+            final value = entry.value;
 
-              Color color;
-              String status;
+            Color color;
+            String status;
 
-              if (value > 0.01) {
-                color = Colors.green;
-                status = "Gets Back";
-              } else if (value < -0.01) {
-                color = Colors.red;
-                status = "Owes";
-              } else {
-                color = Colors.grey;
-                status = "Settled";
-              }
+            if (value > 0.01) {
+              color = Colors.green;
+              status = "Gets Back";
+            } else if (value < -0.01) {
+              color = Colors.red;
+              status = "Owes";
+            } else {
+              color = Colors.grey;
+              status = "Settled";
+            }
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 10),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor:
-                    color.withValues(alpha: .15),
-                    child: Icon(
-                      Icons.person,
-                      color: color,
-                    ),
-                  ),
-                  title: Text(
-                    entry.key,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  subtitle: Text(status),
-                  trailing: Text(
-                    "₱${value.abs().toStringAsFixed(2)}",
-                    style: TextStyle(
-                      color: color,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+            return Card(
+              margin: const EdgeInsets.only(bottom: 10),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: color.withValues(alpha: .15),
+                  child: Icon(Icons.person, color: color),
+                ),
+                title: Text(
+                  entry.key,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(status),
+                trailing: Text(
+                  "₱${value.abs().toStringAsFixed(2)}",
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          }),
       ],
     );
   }

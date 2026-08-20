@@ -26,20 +26,15 @@ class AnimatedCounter extends StatelessWidget {
     );
 
     return TweenAnimationBuilder<double>(
-      tween: Tween(
-        begin: 0,
-        end: value,
-      ),
+      tween: Tween(begin: 0, end: value),
       duration: Duration(milliseconds: duration),
       curve: Curves.easeOutCubic,
       builder: (_, animatedValue, _) {
         return Text(
           "$prefix${formatter.format(animatedValue)}",
-          style: style ??
-              const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-              ),
+          style:
+              style ??
+              const TextStyle(fontSize: 32, fontWeight: FontWeight.w800),
         );
       },
     );

@@ -4,11 +4,7 @@ class FadeSlide extends StatefulWidget {
   final Widget child;
   final Duration delay;
 
-  const FadeSlide({
-    super.key,
-    required this.child,
-    this.delay = Duration.zero,
-  });
+  const FadeSlide({super.key, required this.child, this.delay = Duration.zero});
 
   @override
   State<FadeSlide> createState() => _FadeSlideState();
@@ -31,20 +27,12 @@ class _FadeSlideState extends State<FadeSlide>
       duration: const Duration(milliseconds: 500),
     );
 
-    _opacity = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(_controller);
+    _opacity = Tween<double>(begin: 0, end: 1).animate(_controller);
 
     _offset = Tween<Offset>(
       begin: const Offset(0, .08),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     Future.delayed(widget.delay, () {
       if (mounted) {
@@ -63,10 +51,7 @@ class _FadeSlideState extends State<FadeSlide>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacity,
-      child: SlideTransition(
-        position: _offset,
-        child: widget.child,
-      ),
+      child: SlideTransition(position: _offset, child: widget.child),
     );
   }
 }

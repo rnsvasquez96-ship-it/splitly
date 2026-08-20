@@ -31,3 +31,18 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Firebase client configuration
+mobile/android/app/google-services.json
+mobile/ios/Runner/GoogleService-Info.plist
+mobile/lib/firebase_options.dart
+
+# Firebase Admin / private credentials
+serviceAccountKey.json
+**/serviceAccountKey.json
+*service-account*.json
+
+# Android signing credentials
+*.jks
+*.keystore
+key.properties
